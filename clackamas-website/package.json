@@ -9,10 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "leaflet": "^1.9.4",
+    "leaflet-defaulticon-compatibility": "^0.1.2",
+    "leaflet-providers": "^2.0.0",
     "next": "15.4.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "react-leaflet": "^5.0.0-rc.2"
+    "react-leaflet": "^5.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
