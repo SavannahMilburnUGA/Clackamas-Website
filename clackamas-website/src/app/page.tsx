@@ -1,9 +1,10 @@
-// page.tsx: exports Home page component of map with markers 
+// page.tsx: exports Home page component of map with markers & tab button for temperature type
 "use client";
 import Papa from 'papaparse';
 
 import { useState, useEffect } from 'react';
 import { SiteProps } from './components/Site';
+import TabButton from './components/TabButton';
 
 import dynamic from 'next/dynamic'
 const Map = dynamic(() => import('./components/Map'), {ssr: false, loading: () => <div>Loading map...</div>});
@@ -29,13 +30,41 @@ export default function Home() {
     }); // Papa.parse
   }, []); // useEffect - runs once on mount
 
+  // Handle tab button selection controlling temperature type chosen
+  const[tempType, setTempType] = useState<'air' | 'stream'>('air');
+  const handleAirTemp = async() => {
+    setTempType('air');
+  } // handleAirTemp
+  const handleStreamTemp = async() => {
+    setTempType('stream');
+  } // handleStreamTemp
+
   return(
     // If map is loading: return loading sites, else render Map component w/ siteData
     <div>
       {isLoading ? (
         <p> Loading sites... </p>
       ) : (
-        <Map sites={siteData} />
+        <div>
+        <div className="absolute top-4 right-4 z-[1000] bg-white p-4 rounded-lg shadow-lg">
+            <h3 className="font-semibold mb-3 text-gray-800 text-sm">Daily Mean Temperature Distribution</h3>
+            <div className="flex bg-gray-100 rounded-md p-1 gap-1">
+              <TabButton
+                action={handleAirTemp}
+                isActive={tempType === 'air'}
+              >
+                Air Temperature
+              </TabButton>
+              <TabButton
+                action={handleStreamTemp}
+                isActive={tempType === 'stream'}
+              >
+                Stream Temperature
+              </TabButton>
+            </div>
+          </div>
+        <Map sites={siteData} tempType={tempType} />
+        </div>
       )}
     </div>
   ); // return

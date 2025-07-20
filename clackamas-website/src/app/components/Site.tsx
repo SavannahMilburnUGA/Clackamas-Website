@@ -16,8 +16,8 @@ export default function Site({site, x, y, meanAirTemp, meanStreamTemp, thermalSe
       <div>
         <h1> Site: {site} </h1>
         <p> Location: ({y},{x})</p>     
-        <p> Daily Mean Air Temperature: {meanAirTemp} C </p>
-        <p> Daily Mean Stream Temperature: {meanStreamTemp} C </p>
+        <p> Daily Mean Air Temperature: {meanAirTemp} °C </p>
+        <p> Daily Mean Stream Temperature: {meanStreamTemp} °C </p>
         <p> Thermal Sensitivity: {thermalSensitivity} </p>
       </div>
     );
