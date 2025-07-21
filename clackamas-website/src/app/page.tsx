@@ -5,6 +5,7 @@ import Papa from 'papaparse';
 import { useState, useEffect } from 'react';
 import { SiteProps } from './components/Site';
 import TabButton from './components/TabButton';
+import TempLegend from './components/TempLegend';
 
 import dynamic from 'next/dynamic'
 const Map = dynamic(() => import('./components/Map'), {ssr: false, loading: () => <div>Loading map...</div>});
@@ -31,13 +32,16 @@ export default function Home() {
   }, []); // useEffect - runs once on mount
 
   // Handle tab button selection controlling temperature type chosen
-  const[tempType, setTempType] = useState<'air' | 'stream'>('air');
+  const[tempType, setTempType] = useState<'air' | 'stream' | 'sensitivity'>('air');
   const handleAirTemp = async() => {
     setTempType('air');
   } // handleAirTemp
   const handleStreamTemp = async() => {
     setTempType('stream');
   } // handleStreamTemp
+  const handleSensitivity = async() => {
+    setTempType('sensitivity');
+  } // handleSensitivity
 
   return(
     // If map is loading: return loading sites, else render Map component w/ siteData
@@ -47,7 +51,7 @@ export default function Home() {
       ) : (
         <div>
         <div className="absolute top-4 right-4 z-[1000] bg-white p-4 rounded-lg shadow-lg">
-            <h3 className="font-semibold mb-3 text-gray-800 text-sm">Daily Mean Temperature Distribution</h3>
+            <h3 className="font-semibold mb-3 text-gray-800 text-sm"> Mean Air-Stream Temperature & Thermal Sensitivity Distribution </h3>
             <div className="flex bg-gray-100 rounded-md p-1 gap-1">
               <TabButton
                 action={handleAirTemp}
@@ -61,8 +65,15 @@ export default function Home() {
               >
                 Stream Temperature
               </TabButton>
+              <TabButton
+                action={handleSensitivity}
+                isActive={tempType === 'sensitivity'}
+              >
+                Thermal Sensitivity
+              </TabButton>
             </div>
           </div>
+        <TempLegend tempType={tempType} />
         <Map sites={siteData} tempType={tempType} />
         </div>
       )}

@@ -10,7 +10,7 @@ import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 // Define TypeScript interface for Map component props (siteData)
 interface MapProps {
     sites: SiteProps[];
-    tempType: 'air' | 'stream'; 
+    tempType: 'air' | 'stream' | 'sensitivity'; 
 } // MapProps
 
 // Declaring 38 colors for temperature scale
@@ -30,11 +30,12 @@ const TEMP_SCALE = [
 // Declaring ranges for daily mean air temperature/stream temperature
 const TEMP_RANGES = {
     air: { min: 16.892, max: 21.573},
-    stream: { min: 4.83, max: 21.655}
+    stream: { min: 4.83, max: 21.655}, 
+    sensitivity: { min: 0.005, max: 0.526}
 };
 
 // Find color on temperature scale based on mean air temperature/stream temperature
-const getTempColor = (temp: number, tempType: 'air' | 'stream') : string => {
+const getTempColor = (temp: number, tempType: 'air' | 'stream' | 'sensitivity') : string => {
     const { min, max } = TEMP_RANGES[tempType];
     const normalized = (temp - min) / (max - min);
     const colorIndex = Math.floor(normalized * (TEMP_SCALE.length - 1));
@@ -59,7 +60,8 @@ export default function Map({ sites, tempType } : MapProps) {
         {sites.map((siteData) => {
             console.log("Mapping Site:", siteData.site, "x:", siteData.x, "y:", siteData.y);
             // Finding site temperature & color 
-            const siteTemp = tempType === 'air' ? siteData.meanAirTemp : siteData.meanStreamTemp;
+            const siteTemp = tempType === 'air' ? siteData.meanAirTemp : 
+                                tempType === 'stream' ? siteData.meanStreamTemp : siteData.thermalSensitivity;
             const siteMarkerColor = getTempColor(siteTemp, tempType);
             // Returns Marker for each site in siteData w/ site ID, lat, long, mean AT, mean ST, thermal sensitivity
             return (
