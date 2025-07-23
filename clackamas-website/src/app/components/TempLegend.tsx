@@ -54,17 +54,17 @@ export default function TempLegend ({ tempType } : LegendProps) {
       } // switch
   }; // legendTitle
   
-  // Round values 
-  const roundedValue = (value: number) => {
-    return value.toFixed(3)
-  } // roundedValue
-  // 5 ticks on TempLegend
-  const fiveTicks = [0, 0.25, 0.5, 0.75, 1];
-  // Find actual values based on temperature range for 5 ticks
-  const tickValues = fiveTicks.map(tick => {
-    return range.min + (range.max - range.min) * tick
-  }); // tickValues
-
+  // Make tick values on scale user-friendly (readable)
+  let tickValues = [];
+  // Readable tick values
+  if (tempType === 'air') {
+    tickValues = [17, 18, 19, 20, 21];
+  } else if (tempType === 'stream') {
+    tickValues = [5, 10, 15, 20];
+  } else {
+    tickValues = [0.1, 0.2, 0.3, 0.4, 0.5];
+  } // if 
+  
   return (
     <div className="absolute bottom-4 right-4 z-[1000] bg-white p-4 rounded-lg shadow-lg">
       <h4 className="font-semibold mb-3 text-black text-sm">
@@ -79,7 +79,7 @@ export default function TempLegend ({ tempType } : LegendProps) {
               key={index}
               className="text-xs text-black leading-none"
             >
-              {roundedValue(value)}
+              {value}
             </span>
           ))}
           </div>
