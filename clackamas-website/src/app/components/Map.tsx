@@ -4,6 +4,7 @@ import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css";
 import "leaflet-defaulticon-compatibility";
 
+import { useRouter } from 'next/navigation';
 import Site, { SiteProps } from "./Site";
 import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 
@@ -44,6 +45,13 @@ const getTempColor = (temp: number, tempType: 'air' | 'stream' | 'sensitivity') 
 
 // Return Map component by destructuring MapProps
 export default function Map({ sites, tempType } : MapProps) {
+    // Adding dynamic routing for each site click
+    const router = useRouter();
+    // Handle clicking on site marker to navigate to dynamic site page
+    const handleSiteClick = (id: number) => {
+        router.push(`/site/${id}`);
+    }; // handleSiteClick
+
     console.log("Map component received tempType:", tempType);
     return (
     // Full viewport of device - return map window containing Esri map w/ labels & markers for each site in siteData
@@ -76,6 +84,12 @@ export default function Map({ sites, tempType } : MapProps) {
                             meanStreamTemp={siteData.meanStreamTemp}
                             thermalSensitivity={siteData.thermalSensitivity}
                         />
+                        <div className="mt-3 pt-3 border-t border-gray-200">
+                            <button onClick={() => handleSiteClick(siteData.site)} className="w-full bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 transition-colors"
+                            >
+                                View Site Graph
+                            </button>
+                        </div>
                     </div>
                 </Popup>
             </CircleMarker>
