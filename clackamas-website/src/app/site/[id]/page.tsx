@@ -317,12 +317,17 @@ export default function SitePage () {
                     {siteCoords && (<p>Coordinates: ({siteCoords.lat.toFixed(3)}, {siteCoords.lon.toFixed(3)})</p>)}
                     <p>Mean air temperature: {meanAirTemp.toFixed(3)}°C</p>
                     <p>Mean stream temperature: {meanStreamTemp.toFixed(3)}°C</p>
-                    <p>Thermal sensitivity: {siteTSAndEVs.thermalSensitivity.toFixed(3)}</p>
-                    <p>Stream channel slope: {siteTSAndEVs.SLOPE.toFixed(3)}</p>
-                    <p>High Cascades geology: {siteTSAndEVs.h2oHiCascP.toFixed(3)}</p>
-                    <p>Wetlands: {siteTSAndEVs.h2oWetland.toFixed(3)}</p>
-                    <p>Shrub: {siteTSAndEVs.Shrub21.toFixed(3)}</p>
-                    <p>Burn area: {siteTSAndEVs.BurnRCA.toFixed(3)}</p>
+                    {siteTSAndEVs && (
+                        <>
+                        <p>Thermal sensitivity: {siteTSAndEVs.thermalSensitivity.toFixed(3)}</p>
+                        <p>Stream channel slope: {siteTSAndEVs.SLOPE.toFixed(3)}</p>
+                        <p>High Cascades geology: {siteTSAndEVs.h2oHiCascP.toFixed(3)}</p>
+                        <p>Wetlands: {siteTSAndEVs.h2oWetland.toFixed(3)}</p>
+                        <p>Shrub: {siteTSAndEVs.Shrub21.toFixed(3)}</p>
+                        <p>Burn area: {siteTSAndEVs.BurnRCA.toFixed(3)}</p>
+                        </>
+                    )}
+                    
                 </div>
             </div>
                 )}
