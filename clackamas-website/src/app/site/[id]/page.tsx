@@ -6,7 +6,7 @@ import Papa from 'papaparse';
 // coordinates2021.csv - lat - lon - siteID
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation'; 
+import { useParams, useRouter } from 'next/navigation'; 
 
 import dynamic from 'next/dynamic'
 const Plot = dynamic(() => import('react-plotly.js'), {ssr: false});
@@ -98,6 +98,8 @@ export default function SitePage () {
     const params = useParams();
     const id = params.id as string;
 
+    const router = useRouter();
+
     // useState for AirTempProps, StreamTempProps, CoordinateProps, CombinedMeanTempProps
     const[airTempData, setAirTempData] = useState<AirTempProps[]>([]);
     const[streamTempData, setStreamTempData] = useState<StreamTempProps[]>([]);
@@ -112,6 +114,21 @@ export default function SitePage () {
 
     // useState for landscape covariates
     const[landscapeEVs, setLandscapeEvs] = useState<landscapeEVsProps[]>([]);
+
+    // Site navigation - go upstream/downstream
+    const navUpstream = () => {
+        const currentIndex = parseInt(id);
+        if (currentIndex > 1) {
+            router.push(`/site/${currentIndex - 1}`);
+        } // if
+    }; // navUpstream
+
+    const navDownstream = () => {
+        const currentIndex = parseInt(id);
+        if (currentIndex < 72) {
+            router.push(`/site/${currentIndex + 1}`);
+        } // if 
+    }; // navDownstream
 
   // Using useEffect for data loading of AT/ST and coordinates using Papa Parse to load CSV file
   useEffect(() => {
@@ -233,21 +250,35 @@ export default function SitePage () {
   const siteTSAndEVs = landscapeEVs.find(data => data.index === parseInt(id));
   const currentSiteID = siteTSAndEVs?.site;
   // Find coordinates for current site
-  // Find coordinates for current site - convert both to strings for comparison
   const siteCoords = coordinateData.find(coord => String(coord.siteID) === String(currentSiteID));
   return (
     <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-6xl mx-auto">
             <div className="mb-6">
                 <button 
-                    onClick={() => window.history.back()}
+                    onClick={() => router.push('/')}
                     className="text-blue-600 hover:text-blue-800 mb-4"
                 >
                     Back to Map
                 </button>
-                    <h1 className="text-3xl font-bold text-gray-900">
-                        Thermal Sensitivity for Site {id}
-                    </h1>
+                <h1 className="text-3xl font-bold text-gray-900">
+                    Site {id}: {siteTSAndEVs?.Stream_Nam}
+                </h1>
+            </div>
+
+            <div className="flex justify-between mb-4">
+                {parseInt(id) > 1 && (
+                <button onClick={navUpstream} className="bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 transition-colors"
+                    >
+                     ← Move Upstream: Site {parseInt(id) - 1}
+                </button>
+                )}
+                {parseInt(id) < 72 && (
+                <button onClick={navDownstream} className="bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 transition-colors"
+                    >
+                    Move Downstream: Site {parseInt(id) + 1} → 
+                </button>
+                )}
             </div>
                 
             {isLoading ? (
@@ -280,7 +311,7 @@ export default function SitePage () {
                             ]}
                             layout={{
                                 title: {
-                                    text: `Thermal Sensitivity for Site ${id}`,
+                                    text: `Thermal Sensitivity`,
                                     font: { family: 'Merriweather, serif', color: 'black', size: 16 }
                                 },
                                 xaxis: {
@@ -314,8 +345,6 @@ export default function SitePage () {
                     </div>
                         
                 <div className="mt-4 p-4 bg-gray-100 rounded text-sm">
-                    <p><strong>Site Information: {siteTSAndEVs?.Stream_Nam}</strong></p>
-                    <p>Site ID: {id}</p>
                     {siteCoords && (<p>Coordinates: ({siteCoords.lat.toFixed(3)}, {siteCoords.lon.toFixed(3)})</p>)}
                     <p>Mean air temperature: {meanAirTemp.toFixed(3)}°C</p>
                     <p>Mean stream temperature: {meanStreamTemp.toFixed(3)}°C</p>
