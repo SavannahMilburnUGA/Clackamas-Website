@@ -6,7 +6,8 @@ import "leaflet-defaulticon-compatibility";
 
 import { useRouter } from 'next/navigation';
 import Site, { SiteProps } from "./Site";
-import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
 
 // Define TypeScript interface for Map component props (siteData)
 interface MapProps {
@@ -71,9 +72,29 @@ export default function Map({ sites, tempType } : MapProps) {
             const siteTemp = tempType === 'air' ? siteData.meanAirTemp : 
                                 tempType === 'stream' ? siteData.meanStreamTemp : siteData.thermalSensitivity;
             const siteMarkerColor = getTempColor(siteTemp, tempType);
+            // Number sites with custom numbered icon
+            const numIcon = L.divIcon({
+                html: `<div style="
+                    background-color: ${siteMarkerColor};
+                    border: 1px solid ${siteMarkerColor};
+                    border-radius: 50%;
+                    width: 20px;
+                    height: 20px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 11px;
+                    font-weight: bold;
+                    font-family: Merriweather, sans-serif;
+                    color: white;
+                ">${siteData.index}</div>`,
+                className: 'custom-marker',
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
+            }); // numIcon
             // Returns Marker for each site in siteData w/ site ID, lat, long, mean AT, mean ST, thermal sensitivity
             return (
-            <CircleMarker key={siteData.site} center={[siteData.y, siteData.x]} radius = {8} pathOptions={{fillColor: siteMarkerColor, color: siteMarkerColor, fillOpacity: 1.0, weight: 1}}>
+            <Marker key={siteData.index} position={[siteData.y, siteData.x]} icon={numIcon}>
                 <Popup>
                     <div className="MarkerPopup">
                         <Site
@@ -83,16 +104,22 @@ export default function Map({ sites, tempType } : MapProps) {
                             meanAirTemp={siteData.meanAirTemp}
                             meanStreamTemp={siteData.meanStreamTemp}
                             thermalSensitivity={siteData.thermalSensitivity}
+                            index={siteData.index}
+                            Stream_Nam={siteData.Stream_Nam}
+                            SLOPE={siteData.SLOPE}
+                            h2oHiCascP={siteData.h2oHiCascP}
+                            h2oWetland={siteData.h2oWetland}
+                            Shrub21={siteData.Shrub21}
+                            BurnRCA={siteData.BurnRCA}
                         />
                         <div className="mt-3 pt-3 border-t border-gray-200">
-                            <button onClick={() => handleSiteClick(siteData.site)} className="w-full bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 transition-colors"
-                            >
+                            <button onClick={() => handleSiteClick(siteData.index)} className="w-full bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 transition-colors">
                                 View Site Graph
                             </button>
                         </div>
                     </div>
                 </Popup>
-            </CircleMarker>
+            </Marker>
             );
         })}
         </MapContainer>

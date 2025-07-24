@@ -17,7 +17,7 @@ export default function Home() {
   // Using useEffect for data loading of TSAndEVs2021.csv using Papa Parse to load CSV file
   useEffect(() => {
     // Don't need .then() statements since PapaParse handles promises internally
-    Papa.parse('/data/TSAndEVs2021.csv', {
+    Papa.parse('/data/SortedTSAndEVs2021.csv', {
       download: true,
       header: true,
       dynamicTyping: true,

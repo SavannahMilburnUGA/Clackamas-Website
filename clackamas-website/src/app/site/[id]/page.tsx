@@ -13,14 +13,14 @@ const Plot = dynamic(() => import('react-plotly.js'), {ssr: false});
 
 // Define TypeScript interfaces for SitePage components props - ST/AT/coordinate data can be passed
 interface AirTempProps {
-    site: number;
+    site: number | string;
     date: string;
     tmean_C: number;
     tmin_C: number;
     tmax_C: number;
 } // AirTempProps
 interface StreamTempProps {
-    siteID: number;
+    siteID: number | string;
     date: string;
     dailyMeanST: number;
     dailyMinST: number;
@@ -31,7 +31,7 @@ interface StreamTempProps {
 interface CoordinateProps {
     lat: number;
     lon: number;
-    siteID: number;
+    siteID: number | string;
 } // CoordinateProps
 interface CombinedMeanTempProps {
     date: string;
@@ -48,7 +48,7 @@ interface LinRegProps {
 
 // Adding landscape covariates
 interface landscapeEVsProps {
-    site: number;
+    site: number | string;
     Stream_Nam: string;
     x: number;
     y: number;
@@ -60,6 +60,7 @@ interface landscapeEVsProps {
     h2oWetland: number;
     Shrub21: number;
     BurnRCA: number;
+    index: number;
 } // landscapeEVsProps
 
 // Calculate simple linear regression for thermal sensitivity: daily mean ST ~ daily mean AT
@@ -169,7 +170,7 @@ export default function SitePage () {
     }); // Papa.parse for coordinates
 
     // Landscape EVs data
-    Papa.parse('/data/TSandEVs2021.csv', {
+    Papa.parse('/data/SortedTSandEVs2021.csv', {
       download: true,
       header: true,
       dynamicTyping: true,
@@ -178,7 +179,7 @@ export default function SitePage () {
       checkIfLoaded();
       }, // complete
       error: (error) => {
-        console.log("TSAndEVs CSV loading error:", error);
+        console.log("SortedTSAndEVs CSV loading error:", error);
         checkIfLoaded();
       } // error
     }); // Papa.parse for landscape EVs
@@ -188,51 +189,52 @@ export default function SitePage () {
   // Combine AT and ST data for current site after data is loaded
   useEffect(() => {
     if(!isLoading && airTempData.length > 0 && streamTempData.length > 0) {
-        const currentID = parseInt(id);
+        const currentIndex = parseInt(id);
+        // Find the site data by index first
+        const siteTSAndEVs = landscapeEVs.find(data => data.index === currentIndex);
+        const currentSiteID = siteTSAndEVs?.site;
 
-        // Filter data for current site using site ID
-        const siteAirData = airTempData.filter(data => data.site === currentID);
-        const siteStreamData = streamTempData.filter(data => data.siteID === currentID);
-
-        // Combine AT and ST data by dates
-        const combinedData: CombinedMeanTempProps[] = [];
-        siteAirData.forEach(airData => {
-            const match = siteStreamData.find(streamData => streamData.date === airData.date);
-            if (match) {
-                combinedData.push({
-                    date: airData.date,
-                    tmean_C: airData.tmean_C,
-                    dailyMeanST: match.dailyMeanST
-                }); // add to combinedData
-            } // if
-        }); // combinedData
-        setCombinedMeanTempData(combinedData);
-        // Find simple linear regression: daily mean AT ~ daily mean ST
-        // Calculate means
-        const airMean = combinedData.reduce((sum, d) => sum + d.tmean_C, 0) / combinedData.length;
-        const streamMean = combinedData.reduce((sum, d) => sum + d.dailyMeanST, 0) / combinedData.length;
-        setMeanAirTemp(airMean);
-        setMeanStreamTemp(streamMean);
-        const slr = linReg(combinedData);
-        setRegResults(slr);
+        if(currentSiteID) {
+            // Filter data for current site using siteID, but handle non-numeric values
+            const siteAirData = airTempData.filter(data => String(data.site) === String(currentSiteID));
+            const siteStreamData = streamTempData.filter(data => String(data.siteID) === String(currentSiteID));
+            // Combine AT and ST data by dates
+            const combinedData: CombinedMeanTempProps[] = [];
+            siteAirData.forEach(airData => {
+                const match = siteStreamData.find(streamData => streamData.date === airData.date);
+                if (match) {
+                    combinedData.push({date: airData.date, tmean_C: airData.tmean_C, dailyMeanST: match.dailyMeanST});
+                } // if
+            });
+            setCombinedMeanTempData(combinedData);
+          
+            // Calculate means and regression
+            const airMean = combinedData.reduce((sum, d) => sum + d.tmean_C, 0) / combinedData.length;
+            const streamMean = combinedData.reduce((sum, d) => sum + d.dailyMeanST, 0) / combinedData.length;
+            setMeanAirTemp(airMean);
+            setMeanStreamTemp(streamMean);
+            const slr = linReg(combinedData);
+            setRegResults(slr);
+        } // if
     } // if
 
-  }, [isLoading, airTempData, streamTempData, id]); // useEffect - combining AT and ST data
+  }, [isLoading, airTempData, streamTempData, landscapeEVs, id]); // useEffect - combining AT and ST data
   
   // Find SLR regression line for plotting graph
   const computeRegLine = (): { x: number[], y: number[] } => {
-    // Standardizing axes to 0 to 25
-    const xValues = [0, 25];
+    // Standardizing axes to 0 to 30
+    const xValues = [0, 30];
     const yValues = xValues.map(x => regResults.slope * x + regResults.intercept);
     return { x: xValues, y: yValues };
   }; // computeRegLine
   const slrRegLine = computeRegLine();
 
-  // Find coordinates for current site
-  const siteCoords = coordinateData.find(coord => coord.siteID === parseInt(id));
   // Find landscape covariate values
-  const siteTSAndEVs = landscapeEVs.find(data => data.site === parseInt(id));
-
+  const siteTSAndEVs = landscapeEVs.find(data => data.index === parseInt(id));
+  const currentSiteID = siteTSAndEVs?.site;
+  // Find coordinates for current site
+  // Find coordinates for current site - convert both to strings for comparison
+  const siteCoords = coordinateData.find(coord => String(coord.siteID) === String(currentSiteID));
   return (
     <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-6xl mx-auto">
@@ -283,12 +285,12 @@ export default function SitePage () {
                                 },
                                 xaxis: {
                                     title: { text: 'Mean Air Temperature (°C)'},
-                                    range: [0, 25],
+                                    range: [0, 30],
                                     font: { family: 'Merriweather, serif', color: 'black', size: 12 }
                                 },
                                 yaxis: {
                                     title: {text: 'Mean Stream Temperature (°C)'},
-                                    range: [0, 25],
+                                    range: [0, 30],
                                     font: { family: 'Merriweather, serif', color: 'black', size: 12 }
                                 },
                                 legend: {
@@ -320,7 +322,7 @@ export default function SitePage () {
                     {siteTSAndEVs && (
                         <>
                         <p>Thermal sensitivity: {siteTSAndEVs.thermalSensitivity.toFixed(3)}</p>
-                        <p>Stream channel slope: {siteTSAndEVs.SLOPE.toFixed(3)}</p>
+                        <p>Stream channel slope: {siteTSAndEVs.SLOPE}</p>
                         <p>High Cascades geology: {siteTSAndEVs.h2oHiCascP.toFixed(3)}</p>
                         <p>Wetlands: {siteTSAndEVs.h2oWetland.toFixed(3)}</p>
                         <p>Shrub: {siteTSAndEVs.Shrub21.toFixed(3)}</p>
