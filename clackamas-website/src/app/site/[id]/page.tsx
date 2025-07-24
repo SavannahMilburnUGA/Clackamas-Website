@@ -297,7 +297,8 @@ export default function SitePage () {
                                     mode: 'markers',
                                     marker: { color: '#636efa', size: 8 },
                                     name: 'Daily Values',
-                                    hovertemplate: 'Air Temp: %{x}°C<br>Stream Temp: %{y}°C<extra></extra>'
+                                    hovertemplate: 'Air Temp: %{x}°C<br>Stream Temp: %{y}°C<extra></extra>',
+                                    showlegend:false
                                 },
                                 {
                                     x: slrRegLine.x,
@@ -310,31 +311,27 @@ export default function SitePage () {
                                 }
                             ]}
                             layout={{
-                                title: {
-                                    text: `Thermal Sensitivity`,
-                                    font: { family: 'Merriweather, serif', color: 'black', size: 16 }
-                                },
                                 xaxis: {
                                     title: { text: 'Mean Air Temperature (°C)'},
                                     range: [0, 30],
-                                    font: { family: 'Merriweather, serif', color: 'black', size: 12 }
+                                    font: { family: 'Merriweather, serif', color: 'black', size: 16 }
                                 },
                                 yaxis: {
                                     title: {text: 'Mean Stream Temperature (°C)'},
                                     range: [0, 30],
-                                    font: { family: 'Merriweather, serif', color: 'black', size: 12 }
+                                    font: { family: 'Merriweather, serif', color: 'black', size: 16 }
                                 },
                                 legend: {
                                     x: 0.02,
                                     y: 0.98,
-                                    bgcolor: 'rgba(255,255,255,0.8)',
+                                    bgcolor: '#e5ecf6',
                                     bordercolor: 'rgba(0,0,0,0.2)',
                                     borderwidth: 1,
-                                    font: { family: 'Merriweather, serif', color: 'black', size: 12 }
+                                    font: { family: 'Merriweather, serif', color: 'black', size: 16 }
                                 },
-                                plot_bgcolor: '#e5ecf6',
-                                paper_bgcolor: '#e5ecf6',
-                                font: { family: 'Merriweather, serif', color: 'black', size: 12 },
+                                plot_bgcolor: 'white',
+                                paper_bgcolor: 'white',
+                                font: { family: 'Merriweather, serif', color: 'black', size: 16 },
                                 hovermode: 'closest',
                                 hoverdistance: 20
                             }}
