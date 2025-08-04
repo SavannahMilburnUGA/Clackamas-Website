@@ -5,6 +5,14 @@ import Papa from 'papaparse';
 // CRBStreamTemperatureMMM2021.csv = siteID - date - dailyMeanST - dailyMinST - dailyMaxST - timeMinST - timeMaxST
 // coordinates2021.csv - lat - lon - siteID
 
+
+// Remove border & bg color from legend & centered to near regression line 
+
+// Increase axes font & legend sizes
+
+// Set to 4 - 28 instead of 0
+// Min & Max of DailyMeanAT: 8.4312 - 27.7688
+// Min & Max of DailyMeanAT: 4.511 - 24.827
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation'; 
 
@@ -246,6 +254,29 @@ export default function SitePage () {
   }; // computeRegLine
   const slrRegLine = computeRegLine();
 
+  // Get center of regression line and position legend for each dynamically rendered regression line
+  const findLegendPos = (): { x: number, y: number } => {
+    // Regression results don't exist 
+    if (!regResults) {
+        return { x: 0.25, y: 0.85 }; 
+    } // if
+    
+    const centerX = 8;
+    // Get center of regression line
+    const centerY = regResults.slope * centerX + regResults.intercept;
+    
+    // Normalize to [0, 1]
+    const legendX = (centerX - 4) / (28 - 4); 
+    // Add extra space to make sure legend NOT on regression line/data points
+    const legendY = (centerY - 4) / (28 - 4) + 0.55; 
+    
+    // Ensure legend stays within plot bounds
+    return {
+        x: legendX, 
+        y: Math.max(0.1, Math.min(0.99, legendY))
+    };
+  }; // findLegendPos
+
   // Find landscape covariate values
   const siteTSAndEVs = landscapeEVs.find(data => data.index === parseInt(id));
   const currentSiteID = siteTSAndEVs?.site;
@@ -287,7 +318,7 @@ export default function SitePage () {
                 </div>
                 ) : (
                 <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-                    <div style={{width: '100%', aspectRatio: '1/1', maxWidth: '680px', margin: '0 auto',position: 'relative'}}>
+                    <div style={{width: '100%', aspectRatio: '1/1', maxWidth: '680px', margin: '0 auto', position: 'relative'}}>
                         <Plot
                             data={[
                                 {
@@ -312,26 +343,24 @@ export default function SitePage () {
                             ]}
                             layout={{
                                 xaxis: {
-                                    title: { text: 'Mean Air Temperature (°C)'},
-                                    range: [0, 30],
-                                    font: { family: 'Merriweather, serif', color: 'black', size: 16 }
+                                    title: { text: 'Mean Air Temperature (°C)', standoff: 100},
+                                    range: [4, 28],
+                                    font: { family: 'Merriweather, serif', color: 'black', size: 24 }
                                 },
                                 yaxis: {
-                                    title: {text: 'Mean Stream Temperature (°C)'},
-                                    range: [0, 30],
-                                    font: { family: 'Merriweather, serif', color: 'black', size: 16 }
+                                    title: {text: 'Mean Stream Temperature (°C)', standoff: 100},
+                                    standoff: 100,
+                                    range: [4, 28],
+                                    font: { family: 'Merriweather, serif', color: 'black', size: 24 }
                                 },
                                 legend: {
-                                    x: 0.02,
-                                    y: 0.98,
-                                    bgcolor: '#e5ecf6',
-                                    bordercolor: 'rgba(0,0,0,0.2)',
-                                    borderwidth: 1,
-                                    font: { family: 'Merriweather, serif', color: 'black', size: 16 }
+                                    ...findLegendPos(),
+                                    bgcolor: '#fff',
+                                    font: { family: 'Merriweather, serif', color: 'black', size: 24 }
                                 },
                                 plot_bgcolor: 'white',
                                 paper_bgcolor: 'white',
-                                font: { family: 'Merriweather, serif', color: 'black', size: 16 },
+                                font: { family: 'Merriweather, serif', color: 'black', size: 24 },
                                 hovermode: 'closest',
                                 hoverdistance: 20
                             }}
