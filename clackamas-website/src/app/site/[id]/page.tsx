@@ -5,14 +5,6 @@ import Papa from 'papaparse';
 // CRBStreamTemperatureMMM2021.csv = siteID - date - dailyMeanST - dailyMinST - dailyMaxST - timeMinST - timeMaxST
 // coordinates2021.csv - lat - lon - siteID
 
-
-// Remove border & bg color from legend & centered to near regression line 
-
-// Increase axes font & legend sizes
-
-// Set to 4 - 28 instead of 0
-// Min & Max of DailyMeanAT: 8.4312 - 27.7688
-// Min & Max of DailyMeanAT: 4.511 - 24.827
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation'; 
 
@@ -341,6 +333,9 @@ export default function SitePage () {
                                     hoverinfo: 'skip'
                                 }
                             ]}
+                            // Graph scale: set to 4 - 28 instead of 0
+                            // Min & Max of DailyMeanAT: 8.4312 - 27.7688
+                            // Min & Max of DailyMeanAT: 4.511 - 24.827
                             layout={{
                                 xaxis: {
                                     title: { text: 'Mean Air Temperature (°C)', standoff: 100},
